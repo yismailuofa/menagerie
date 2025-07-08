@@ -1,5 +1,6 @@
 import { useHabits } from "@/contexts/HabitContext";
 import { useEffect, useRef, useState } from "react";
+import AnimatedAnimal from "./AnimatedAnimal";
 
 interface AnimatedShape {
   id: string;
@@ -11,16 +12,22 @@ interface AnimatedShape {
   name: string;
   habitId: string;
   entryId: string;
+  isMoving: boolean;
+  movementTimer: number;
+  pauseTimer: number;
+  size: number; // Diameter of the rendered animal
 }
 
 export default function Playground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>(0);
   const { habits } = useHabits();
   const [shapes, setShapes] = useState<AnimatedShape[]>([]);
   const shapesRef = useRef<AnimatedShape[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+
+  // Base size for a single (unmerged) entry
+  const BASE_SIZE = 40;
 
   // Handle canvas resize
   useEffect(() => {
@@ -44,17 +51,48 @@ export default function Playground() {
     const newShapes: AnimatedShape[] = [];
 
     habits.forEach((habit) => {
-      habit.entries.forEach((entry) => {
+      const totalEntries = habit.entries.length;
+
+      const groupsOfTen = Math.floor(totalEntries / 10);
+
+      // 1. Create ONE consolidated shape representing all full groups of 10
+      if (groupsOfTen > 0) {
+        const size = BASE_SIZE * (1 + 0.1 * groupsOfTen); // 10% larger per group of ten
+        newShapes.push({
+          id: `${habit.id}-grouped-tens`,
+          habitId: habit.id,
+          entryId: `grouped-tens`,
+          x: Math.random() * (canvasSize.width - size) + size / 2,
+          y: Math.random() * (canvasSize.height - size) + size / 2,
+          vx: (Math.random() - 0.5) * 60,
+          vy: (Math.random() - 0.5) * 60,
+          color: habit.color,
+          name: habit.name,
+          isMoving: true,
+          movementTimer: Math.random() * 3000 + 2000,
+          pauseTimer: 0,
+          size,
+        });
+      }
+
+      // 2. Create individual shapes for any remaining entries (<10)
+      const remainingEntries = habit.entries.slice(groupsOfTen * 10);
+      remainingEntries.forEach((entry) => {
+        const size = BASE_SIZE;
         newShapes.push({
           id: `${habit.id}-${entry.id}`,
           habitId: habit.id,
           entryId: entry.id,
-          x: Math.random() * (canvasSize.width - 30) + 15,
-          y: Math.random() * (canvasSize.height - 30) + 15,
-          vx: (Math.random() - 0.5) * 3,
-          vy: (Math.random() - 0.5) * 3,
+          x: Math.random() * (canvasSize.width - size) + size / 2,
+          y: Math.random() * (canvasSize.height - size) + size / 2,
+          vx: (Math.random() - 0.5) * 60,
+          vy: (Math.random() - 0.5) * 60,
           color: habit.color,
           name: habit.name,
+          isMoving: true,
+          movementTimer: Math.random() * 3000 + 2000,
+          pauseTimer: 0,
+          size,
         });
       });
     });
@@ -65,42 +103,67 @@ export default function Playground() {
 
   // Animation loop
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!containerRef.current) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let lastTime = 0;
+    const animate = (currentTime: number) => {
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
 
       const updatedShapes = shapesRef.current.map((shape) => {
-        let newX = shape.x + shape.vx;
-        let newY = shape.y + shape.vy;
+        const deltaSeconds = deltaTime / 1000; // convert to seconds
+
+        let newX = shape.x;
+        let newY = shape.y;
         let newVx = shape.vx;
         let newVy = shape.vy;
+        let newIsMoving = shape.isMoving;
+        let newMovementTimer = shape.movementTimer;
+        let newPauseTimer = shape.pauseTimer;
 
-        // Bounce off walls
-        if (newX <= 15 || newX >= canvas.width - 15) {
-          newVx = -newVx;
-          newX = Math.max(15, Math.min(canvas.width - 15, newX));
+        // Update timers
+        if (shape.isMoving) {
+          newMovementTimer -= deltaTime;
+          if (newMovementTimer <= 0) {
+            // Switch to pause mode
+            newIsMoving = false;
+            newPauseTimer = Math.random() * 2000 + 1000; // 1-3 seconds pause
+          }
+        } else {
+          newPauseTimer -= deltaTime;
+          if (newPauseTimer <= 0) {
+            // Switch back to movement mode
+            newIsMoving = true;
+            newMovementTimer = Math.random() * 3000 + 2000; // 2-5 seconds movement
+            // Optionally change direction
+            newVx = (Math.random() - 0.5) * 60;
+            newVy = (Math.random() - 0.5) * 60;
+          }
         }
-        if (newY <= 15 || newY >= canvas.height - 15) {
-          newVy = -newVy;
-          newY = Math.max(15, Math.min(canvas.height - 15, newY));
+
+        // Move only if in movement mode
+        if (newIsMoving) {
+          const halfSize = shape.size / 2;
+
+          newX = shape.x + newVx * deltaSeconds;
+          newY = shape.y + newVy * deltaSeconds;
+
+          // Bounce off walls
+          if (newX <= halfSize || newX >= canvasSize.width - halfSize) {
+            newVx = -newVx;
+            newX = Math.max(
+              halfSize,
+              Math.min(canvasSize.width - halfSize, newX)
+            );
+          }
+          if (newY <= halfSize || newY >= canvasSize.height - halfSize) {
+            newVy = -newVy;
+            newY = Math.max(
+              halfSize,
+              Math.min(canvasSize.height - halfSize, newY)
+            );
+          }
         }
-
-        // Draw the shape
-        ctx.fillStyle = shape.color;
-        ctx.beginPath();
-        ctx.arc(newX, newY, 12, 0, 2 * Math.PI);
-        ctx.fill();
-
-        // Draw the name
-        ctx.fillStyle = "white";
-        ctx.font = "12px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(shape.name, newX, newY - 20);
 
         return {
           ...shape,
@@ -108,15 +171,19 @@ export default function Playground() {
           y: newY,
           vx: newVx,
           vy: newVy,
+          isMoving: newIsMoving,
+          movementTimer: newMovementTimer,
+          pauseTimer: newPauseTimer,
         };
       });
 
       shapesRef.current = updatedShapes;
+      setShapes([...updatedShapes]); // Trigger re-render for React components
       animationRef.current = requestAnimationFrame(animate);
     };
 
     if (shapesRef.current.length > 0) {
-      animate();
+      animationRef.current = requestAnimationFrame(animate);
     }
 
     return () => {
@@ -129,14 +196,26 @@ export default function Playground() {
   return (
     <div
       ref={containerRef}
-      className="border-2 w-full h-full rounded-md p-4 bg-card"
+      className="border-2 w-full h-full rounded-md p-4 bg-card relative overflow-hidden"
     >
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-        className="w-full h-full bg-background rounded-md"
-      />
+      <div
+        className="w-full h-full bg-background rounded-md relative"
+        style={{
+          backgroundImage: "url('/grass.png')",
+          backgroundRepeat: "repeat",
+        }}
+      >
+        {shapes.map((shape) => (
+          <AnimatedAnimal
+            key={shape.id}
+            habitName={shape.name}
+            x={shape.x}
+            y={shape.y}
+            size={shape.size}
+            isMoving={shape.isMoving}
+          />
+        ))}
+      </div>
     </div>
   );
 }

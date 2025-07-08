@@ -8,7 +8,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <HabitProvider>
-        <div className="container mx-auto flex flex-col items-center h-full w-screen bg-background p-4 gap-4">
+        <div className="container mx-auto flex flex-col items-center h-full w-screen bg-background p-8 gap-1">
           <CreateButton />
           <HabitList />
           <div className="h-[70vh] w-full">
