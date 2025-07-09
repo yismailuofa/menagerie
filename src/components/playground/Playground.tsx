@@ -16,6 +16,7 @@ interface AnimatedShape {
   movementTimer: number;
   pauseTimer: number;
   size: number; // Diameter of the rendered animal
+  facingLeft: boolean; // Track which direction the animal is facing
 }
 
 export default function Playground() {
@@ -72,6 +73,7 @@ export default function Playground() {
           movementTimer: Math.random() * 3000 + 2000,
           pauseTimer: 0,
           size,
+          facingLeft: false, // Default facing right
         });
       }
 
@@ -93,6 +95,7 @@ export default function Playground() {
           movementTimer: Math.random() * 3000 + 2000,
           pauseTimer: 0,
           size,
+          facingLeft: false, // Default facing right
         });
       });
     });
@@ -120,6 +123,7 @@ export default function Playground() {
         let newIsMoving = shape.isMoving;
         let newMovementTimer = shape.movementTimer;
         let newPauseTimer = shape.pauseTimer;
+        let newFacingLeft = shape.facingLeft;
 
         // Update timers
         if (shape.isMoving) {
@@ -138,6 +142,8 @@ export default function Playground() {
             // Optionally change direction
             newVx = (Math.random() - 0.5) * 60;
             newVy = (Math.random() - 0.5) * 60;
+            // Update facing direction based on new velocity
+            newFacingLeft = newVx < 0;
           }
         }
 
@@ -151,6 +157,8 @@ export default function Playground() {
           // Bounce off walls
           if (newX <= halfSize || newX >= canvasSize.width - halfSize) {
             newVx = -newVx;
+            // Update facing direction when bouncing horizontally
+            newFacingLeft = newVx < 0;
             newX = Math.max(
               halfSize,
               Math.min(canvasSize.width - halfSize, newX)
@@ -174,6 +182,7 @@ export default function Playground() {
           isMoving: newIsMoving,
           movementTimer: newMovementTimer,
           pauseTimer: newPauseTimer,
+          facingLeft: newFacingLeft,
         };
       });
 
@@ -214,6 +223,7 @@ export default function Playground() {
             size={shape.size}
             isMoving={shape.isMoving}
             color={shape.color}
+            facingLeft={shape.facingLeft}
           />
         ))}
       </div>

@@ -8,6 +8,7 @@ interface AnimatedAnimalProps {
   size: number;
   isMoving: boolean;
   color: string;
+  facingLeft: boolean;
 }
 
 export default function AnimatedAnimal({
@@ -17,6 +18,7 @@ export default function AnimatedAnimal({
   size,
   isMoving,
   color,
+  facingLeft,
 }: AnimatedAnimalProps) {
   // Determine which animal to use for this habit deterministically
   const { gifSrc, pngSrc } = useMemo(() => {
@@ -54,6 +56,7 @@ export default function AnimatedAnimal({
     transition: isMoving ? undefined : "filter 200ms",
     filter: isMoving ? "none" : "grayscale(50%)",
     objectFit: "cover",
+    transform: facingLeft ? "scaleX(-1)" : "scaleX(1)",
   };
 
   const captionStyle: React.CSSProperties = {
