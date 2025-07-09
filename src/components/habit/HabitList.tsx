@@ -30,7 +30,7 @@ export const HabitList: React.FC = () => {
 
   const getButtonIcon = (habit: any) => {
     if (habit.isDead) {
-      return <Heart size={16} />;
+      return <Heart size={16} className="fill-red-600 text-transparent" />;
     }
     return <Check size={16} />;
   };
@@ -109,7 +109,7 @@ export const HabitList: React.FC = () => {
                   onClick={() => handleCompleteHabit(habit.id)}
                   variant={habit.isDead ? "default" : "outline"}
                   size="sm"
-                  className="w-full"
+                  className="w-full mt-auto"
                 >
                   {getButtonIcon(habit)}
                   {getButtonText(habit)}

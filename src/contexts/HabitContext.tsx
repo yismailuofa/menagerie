@@ -1,4 +1,4 @@
-import { checkAllHabitsHealth, reviveHabit } from "@/lib/habitHealthUtils";
+import { checkAllHabitsHealth } from "@/lib/habitHealthUtils";
 import React, {
   createContext,
   type ReactNode,
@@ -148,12 +148,11 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     setHabits((prev) =>
       prev.map((habit) => {
         if (habit.id === habitId) {
-          const updatedHabit = habit.isDead ? reviveHabit(habit) : habit;
           return {
-            ...updatedHabit,
-            entries: [...updatedHabit.entries, newEntry],
+            ...habit,
+            entries: habit.isDead ? [newEntry] : [...habit.entries, newEntry],
             lastCompletedAt: new Date(),
-            health: 100, // Reset to full health on completion
+            health: 100,
             isDead: false,
           };
         }
