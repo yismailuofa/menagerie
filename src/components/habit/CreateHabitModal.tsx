@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { CadenceSlider } from "@/components/ui/cadence-slider";
 import {
   Form,
   FormControl,
@@ -22,6 +23,7 @@ const formSchema = z.object({
     .min(1, "Habit name is required")
     .max(50, "Habit name must be less than 50 characters"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Please select a valid color"),
+  cadence: z.number().min(15, "Cadence must be at least 15 seconds"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -42,11 +44,12 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
     defaultValues: {
       name: "",
       color: "#88aaee",
+      cadence: 86400, // Default to daily
     },
   });
 
   const onSubmit = (data: FormData) => {
-    createHabit(data.name, data.color);
+    createHabit(data.name, data.color, data.cadence);
     form.reset();
     onClose();
   };
@@ -113,6 +116,26 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
                       </label>
                     </div>
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cadence"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cadence</FormLabel>
+                  <FormControl>
+                    <CadenceSlider
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    How often you want to perform this habit.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

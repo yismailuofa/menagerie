@@ -1,3 +1,4 @@
+import { checkAllHabitsHealth, reviveHabit } from "@/lib/habitHealthUtils";
 import React, {
   createContext,
   type ReactNode,
@@ -17,11 +18,15 @@ export interface Habit {
   color: string;
   createdAt: Date;
   entries: HabitEntry[];
+  cadence: number; // in seconds
+  health: number; // 0-100
+  isDead: boolean;
+  lastCompletedAt: Date;
 }
 
 interface HabitContextType {
   habits: Habit[];
-  createHabit: (name: string, color: string) => void;
+  createHabit: (name: string, color: string, cadence: number) => void;
   updateHabit: (id: string, updates: Partial<Habit>) => void;
   deleteHabit: (id: string) => void;
   addHabitEntry: (habitId: string) => void;
@@ -57,6 +62,11 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
         const habitsWithDates = parsedHabits.map((habit: any) => ({
           ...habit,
           createdAt: new Date(habit.createdAt),
+          lastCompletedAt: new Date(habit.lastCompletedAt || habit.createdAt),
+          // Set defaults for new fields if they don't exist (backward compatibility)
+          cadence: habit.cadence || 86400, // default to daily
+          health: habit.health ?? 100, // default to full health
+          isDead: habit.isDead ?? false,
           entries: habit.entries.map((entry: any) => ({
             ...entry,
             date: new Date(entry.date),
@@ -81,7 +91,24 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     }
   }, [habits, isLoaded]);
 
-  const createHabit = (name: string, color: string) => {
+  // Periodic health check - runs every 30 seconds
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const healthCheckInterval = setInterval(() => {
+      setHabits((currentHabits) => {
+        const updatedHabits = checkAllHabitsHealth(currentHabits);
+        return updatedHabits;
+      });
+    }, 10000); // Check every 10 seconds
+
+    // Initial health check
+    setHabits((currentHabits) => checkAllHabitsHealth(currentHabits));
+
+    return () => clearInterval(healthCheckInterval);
+  }, [isLoaded]);
+
+  const createHabit = (name: string, color: string, cadence: number) => {
     const now = new Date();
     const initialEntry: HabitEntry = {
       id: crypto.randomUUID(),
@@ -94,6 +121,10 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
       color,
       createdAt: now,
       entries: [initialEntry], // Initialize with a new entry
+      cadence,
+      health: 100,
+      isDead: false,
+      lastCompletedAt: now,
     };
     setHabits((prev) => [...prev, newHabit]);
   };
@@ -115,11 +146,19 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     };
 
     setHabits((prev) =>
-      prev.map((habit) =>
-        habit.id === habitId
-          ? { ...habit, entries: [...habit.entries, newEntry] }
-          : habit
-      )
+      prev.map((habit) => {
+        if (habit.id === habitId) {
+          const updatedHabit = habit.isDead ? reviveHabit(habit) : habit;
+          return {
+            ...updatedHabit,
+            entries: [...updatedHabit.entries, newEntry],
+            lastCompletedAt: new Date(),
+            health: 100, // Reset to full health on completion
+            isDead: false,
+          };
+        }
+        return habit;
+      })
     );
   };
 

@@ -17,6 +17,7 @@ interface AnimatedShape {
   pauseTimer: number;
   size: number; // Diameter of the rendered animal
   facingLeft: boolean; // Track which direction the animal is facing
+  isDead: boolean; // Track if the habit is dead
 }
 
 export default function Playground() {
@@ -53,7 +54,6 @@ export default function Playground() {
 
     habits.forEach((habit) => {
       const totalEntries = habit.entries.length;
-
       const groupsOfTen = Math.floor(totalEntries / 10);
 
       // 1. Create ONE consolidated shape representing all full groups of 10
@@ -69,11 +69,12 @@ export default function Playground() {
           vy: (Math.random() - 0.5) * 60,
           color: habit.color,
           name: habit.name,
-          isMoving: true,
+          isMoving: !habit.isDead, // Dead habits don't move
           movementTimer: Math.random() * 3000 + 2000,
           pauseTimer: 0,
           size,
           facingLeft: false, // Default facing right
+          isDead: habit.isDead,
         });
       }
 
@@ -91,11 +92,12 @@ export default function Playground() {
           vy: (Math.random() - 0.5) * 60,
           color: habit.color,
           name: habit.name,
-          isMoving: true,
+          isMoving: !habit.isDead, // Dead habits don't move
           movementTimer: Math.random() * 3000 + 2000,
           pauseTimer: 0,
           size,
           facingLeft: false, // Default facing right
+          isDead: habit.isDead,
         });
       });
     });
@@ -114,6 +116,11 @@ export default function Playground() {
       lastTime = currentTime;
 
       const updatedShapes = shapesRef.current.map((shape) => {
+        // Skip animation for dead habits
+        if (shape.isDead) {
+          return shape;
+        }
+
         const deltaSeconds = deltaTime / 1000; // convert to seconds
 
         let newX = shape.x;
@@ -224,6 +231,7 @@ export default function Playground() {
             isMoving={shape.isMoving}
             color={shape.color}
             facingLeft={shape.facingLeft}
+            isDead={shape.isDead}
           />
         ))}
       </div>

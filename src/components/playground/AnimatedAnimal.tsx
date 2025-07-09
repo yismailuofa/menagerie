@@ -9,6 +9,7 @@ interface AnimatedAnimalProps {
   isMoving: boolean;
   color: string;
   facingLeft: boolean;
+  isDead?: boolean;
 }
 
 export default function AnimatedAnimal({
@@ -19,6 +20,7 @@ export default function AnimatedAnimal({
   isMoving,
   color,
   facingLeft,
+  isDead = false,
 }: AnimatedAnimalProps) {
   // Determine which animal to use for this habit deterministically
   const { gifSrc, pngSrc } = useMemo(() => {
@@ -54,8 +56,8 @@ export default function AnimatedAnimal({
     width: size,
     height: size,
     transition: isMoving ? undefined : "filter 200ms",
-    filter: isMoving ? "none" : "grayscale(50%)",
-    objectFit: "cover",
+    filter: isDead ? "none" : isMoving ? "none" : "grayscale(50%)",
+    objectFit: "contain",
     transform: facingLeft ? "scaleX(-1)" : "scaleX(1)",
   };
 
@@ -64,7 +66,7 @@ export default function AnimatedAnimal({
     lineHeight: "12px",
     marginTop: 2,
     color: "white",
-    backgroundColor: color,
+    backgroundColor: isDead ? "#666" : color,
     padding: "2px 4px",
     borderRadius: "4px",
     textShadow:
@@ -72,15 +74,19 @@ export default function AnimatedAnimal({
     whiteSpace: "nowrap",
   };
 
+  // Use rip.png for dead habits, otherwise use the animal animation
+  const imageSrc = isDead ? "/rip.png" : isMoving ? gifSrc : pngSrc;
+  const displayText = isDead ? `💀 ${habitName}` : habitName;
+
   return (
     <div style={containerStyle}>
       <img
-        src={isMoving ? gifSrc : pngSrc}
-        alt={habitName}
+        src={imageSrc}
+        alt={isDead ? "Dead habit" : habitName}
         style={imgStyle}
         draggable={false}
       />
-      <span style={captionStyle}>{habitName}</span>
+      <span style={captionStyle}>{displayText}</span>
     </div>
   );
 }
