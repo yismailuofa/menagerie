@@ -35,8 +35,8 @@ export default function Playground() {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         setCanvasSize({
-          width: rect.width - 32, // Account for padding
-          height: rect.height - 32,
+          width: rect.width - 60, // Account for padding
+          height: rect.height - 60,
         });
       }
     };
@@ -213,6 +213,7 @@ export default function Playground() {
             y={shape.y}
             size={shape.size}
             isMoving={shape.isMoving}
+            color={shape.color}
           />
         ))}
       </div>

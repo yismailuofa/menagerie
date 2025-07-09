@@ -98,24 +98,18 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
                 <FormItem>
                   <FormLabel>Color</FormLabel>
                   <FormControl>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <input
                         type="color"
                         value={field.value}
                         onChange={field.onChange}
-                        className="invisible w-0 h-0 p-0 m-0"
+                        className="cursor-pointer w-8 h-8"
                         id="color"
                       />
                       <label htmlFor="color">
-                        <div className="flex items-center gap-2 cursor-pointer">
-                          <div
-                            className="w-6 h-6 rounded-full border border-input"
-                            style={{ backgroundColor: field.value }}
-                          />
-                          <span className="text-sm font-mono text-muted-foreground">
-                            {field.value}
-                          </span>
-                        </div>
+                        <span className="text-sm font-mono text-muted-foreground">
+                          {field.value}
+                        </span>
                       </label>
                     </div>
                   </FormControl>

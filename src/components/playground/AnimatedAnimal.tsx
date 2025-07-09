@@ -7,6 +7,7 @@ interface AnimatedAnimalProps {
   y: number;
   size: number;
   isMoving: boolean;
+  color: string;
 }
 
 export default function AnimatedAnimal({
@@ -15,6 +16,7 @@ export default function AnimatedAnimal({
   y,
   size,
   isMoving,
+  color,
 }: AnimatedAnimalProps) {
   // Determine which animal to use for this habit deterministically
   const { gifSrc, pngSrc } = useMemo(() => {
@@ -59,6 +61,9 @@ export default function AnimatedAnimal({
     lineHeight: "12px",
     marginTop: 2,
     color: "white",
+    backgroundColor: color,
+    padding: "2px 4px",
+    borderRadius: "4px",
     textShadow:
       "0 0 8px rgba(0,0,0,0.6), 0 0 4px rgba(0,0,0,1), 0 0 2px rgba(0,0,0,1)",
     whiteSpace: "nowrap",
