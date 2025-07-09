@@ -2,4 +2,4 @@
 
 habit tracker zoo
 
-<img width="1470" alt="image" src="https://github.com/user-attachments/assets/d5372ed4-33ed-4d24-8ecc-811686494051" />
+<img width="1453" alt="Screenshot 2025-07-08 at 11 29 41 PM" src="https://github.com/user-attachments/assets/8c6ef24f-9350-4512-99cd-96ce7e1b2859" />
