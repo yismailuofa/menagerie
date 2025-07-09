@@ -59,21 +59,25 @@ export default function Playground() {
       // 1. Create ONE consolidated shape representing all full groups of 10
       if (groupsOfTen > 0) {
         const size = BASE_SIZE * (1 + 0.1 * groupsOfTen); // 10% larger per group of ten
+
+        const vx = (Math.random() - 0.5) * 100;
+        const vy = (Math.random() - 0.5) * 100;
+
         newShapes.push({
           id: `${habit.id}-grouped-tens`,
           habitId: habit.id,
           entryId: `grouped-tens`,
           x: Math.random() * (canvasSize.width - size) + size / 2,
           y: Math.random() * (canvasSize.height - size) + size / 2,
-          vx: (Math.random() - 0.5) * 60,
-          vy: (Math.random() - 0.5) * 60,
+          vx,
+          vy,
           color: habit.color,
           name: habit.name,
           isMoving: !habit.isDead, // Dead habits don't move
           movementTimer: Math.random() * 3000 + 2000,
           pauseTimer: 0,
           size,
-          facingLeft: false, // Default facing right
+          facingLeft: vx < 0, // Default facing right
           isDead: habit.isDead,
         });
       }
@@ -82,21 +86,24 @@ export default function Playground() {
       const remainingEntries = habit.entries.slice(groupsOfTen * 10);
       remainingEntries.forEach((entry) => {
         const size = BASE_SIZE;
+        const vx = (Math.random() - 0.5) * 100;
+        const vy = (Math.random() - 0.5) * 100;
+
         newShapes.push({
           id: `${habit.id}-${entry.id}`,
           habitId: habit.id,
           entryId: entry.id,
           x: Math.random() * (canvasSize.width - size) + size / 2,
           y: Math.random() * (canvasSize.height - size) + size / 2,
-          vx: (Math.random() - 0.5) * 60,
-          vy: (Math.random() - 0.5) * 60,
+          vx,
+          vy,
           color: habit.color,
           name: habit.name,
           isMoving: !habit.isDead, // Dead habits don't move
           movementTimer: Math.random() * 3000 + 2000,
           pauseTimer: 0,
           size,
-          facingLeft: false, // Default facing right
+          facingLeft: vx < 0, // Default facing right
           isDead: habit.isDead,
         });
       });
@@ -147,8 +154,8 @@ export default function Playground() {
             newIsMoving = true;
             newMovementTimer = Math.random() * 3000 + 2000; // 2-5 seconds movement
             // Optionally change direction
-            newVx = (Math.random() - 0.5) * 60;
-            newVy = (Math.random() - 0.5) * 60;
+            newVx = (Math.random() - 0.5) * 100;
+            newVy = (Math.random() - 0.5) * 100;
             // Update facing direction based on new velocity
             newFacingLeft = newVx < 0;
           }
