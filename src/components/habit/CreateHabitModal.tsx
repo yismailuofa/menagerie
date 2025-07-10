@@ -1,3 +1,4 @@
+import { AnimalSelector } from "@/components/ui/animal-selector";
 import { Button } from "@/components/ui/button";
 import { CadenceSlider } from "@/components/ui/cadence-slider";
 import {
@@ -23,6 +24,7 @@ const formSchema = z.object({
     .min(1, "Habit name is required")
     .max(50, "Habit name must be less than 50 characters"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Please select a valid color"),
+  animal: z.string().min(1, "Please select an animal"),
   cadence: z.number().min(15, "Cadence must be at least 15 seconds"),
 });
 
@@ -44,12 +46,13 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
     defaultValues: {
       name: "",
       color: "#88aaee",
+      animal: "CluckingChicken", // Default animal
       cadence: 86400, // Default to daily
     },
   });
 
   const onSubmit = (data: FormData) => {
-    createHabit(data.name, data.color, data.cadence);
+    createHabit(data.name, data.color, data.cadence, data.animal);
     form.reset();
     onClose();
   };
@@ -116,6 +119,26 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
                       </label>
                     </div>
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="animal"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Animal</FormLabel>
+                  <FormControl>
+                    <AnimalSelector
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Choose an animal to represent your habit.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

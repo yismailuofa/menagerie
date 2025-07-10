@@ -10,6 +10,7 @@ interface AnimatedShape {
   vy: number;
   color: string;
   name: string;
+  animal: string; // Add animal to shape
   habitId: string;
   entryId: string;
   isMoving: boolean;
@@ -73,6 +74,7 @@ export default function Playground() {
           vy,
           color: habit.color,
           name: habit.name,
+          animal: habit.animal,
           isMoving: !habit.isDead, // Dead habits don't move
           movementTimer: Math.random() * 3000 + 2000,
           pauseTimer: 0,
@@ -99,6 +101,7 @@ export default function Playground() {
           vy,
           color: habit.color,
           name: habit.name,
+          animal: habit.animal,
           isMoving: !habit.isDead, // Dead habits don't move
           movementTimer: Math.random() * 3000 + 2000,
           pauseTimer: 0,
@@ -232,6 +235,7 @@ export default function Playground() {
           <AnimatedAnimal
             key={shape.id}
             habitName={shape.name}
+            animal={shape.animal}
             x={shape.x}
             y={shape.y}
             size={shape.size}

@@ -1,8 +1,9 @@
-import { getAnimalAssetDir, getAnimalForHabit } from "@/lib/animalUtils";
+import { getAnimalAssets, getAnimalForHabit } from "@/lib/animalUtils";
 import { useMemo } from "react";
 
 interface AnimatedAnimalProps {
   habitName: string;
+  animal?: string; // Add optional animal prop
   x: number;
   y: number;
   size: number;
@@ -14,6 +15,7 @@ interface AnimatedAnimalProps {
 
 export default function AnimatedAnimal({
   habitName,
+  animal,
   x,
   y,
   size,
@@ -22,22 +24,11 @@ export default function AnimatedAnimal({
   facingLeft,
   isDead = false,
 }: AnimatedAnimalProps) {
-  // Determine which animal to use for this habit deterministically
+  // Determine which animal to use for this habit
   const { gifSrc, pngSrc } = useMemo(() => {
-    const animalName = getAnimalForHabit(habitName);
-    const dirName = getAnimalAssetDir(animalName);
-
-    // Build the asset path. All assets live under public/assets.
-    const baseDir = "Basic Animal Animations";
-    const basePath = `/assets/${encodeURIComponent(
-      baseDir
-    )}/${encodeURIComponent(dirName)}/${animalName}`;
-
-    return {
-      gifSrc: `${basePath}.gif`,
-      pngSrc: `${basePath}.png`,
-    };
-  }, [habitName]);
+    const animalName = animal || getAnimalForHabit(habitName); // Use custom animal or fallback to hash-based
+    return getAnimalAssets(animalName);
+  }, [habitName, animal]);
 
   // Container style handles positioning. Image + caption are children.
   const containerStyle: React.CSSProperties = {

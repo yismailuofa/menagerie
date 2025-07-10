@@ -16,6 +16,7 @@ export interface Habit {
   id: string;
   name: string;
   color: string;
+  animal: string; // Add animal field
   createdAt: Date;
   entries: HabitEntry[];
   cadence: number; // in seconds
@@ -26,7 +27,12 @@ export interface Habit {
 
 interface HabitContextType {
   habits: Habit[];
-  createHabit: (name: string, color: string, cadence: number) => void;
+  createHabit: (
+    name: string,
+    color: string,
+    cadence: number,
+    animal: string
+  ) => void;
   updateHabit: (id: string, updates: Partial<Habit>) => void;
   deleteHabit: (id: string) => void;
   addHabitEntry: (habitId: string) => void;
@@ -67,6 +73,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
           cadence: habit.cadence || 86400, // default to daily
           health: habit.health ?? 100, // default to full health
           isDead: habit.isDead ?? false,
+          animal: habit.animal || "CluckingChicken", // default animal for backward compatibility
           entries: habit.entries.map((entry: any) => ({
             ...entry,
             date: new Date(entry.date),
@@ -108,7 +115,12 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
     return () => clearInterval(healthCheckInterval);
   }, [isLoaded]);
 
-  const createHabit = (name: string, color: string, cadence: number) => {
+  const createHabit = (
+    name: string,
+    color: string,
+    cadence: number,
+    animal: string
+  ) => {
     const now = new Date();
     const initialEntry: HabitEntry = {
       id: crypto.randomUUID(),
@@ -119,6 +131,7 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
       id: crypto.randomUUID(),
       name,
       color,
+      animal,
       createdAt: now,
       entries: [initialEntry], // Initialize with a new entry
       cadence,
