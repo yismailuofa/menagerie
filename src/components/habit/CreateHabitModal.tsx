@@ -1,4 +1,4 @@
-import { AnimalSelector } from "@/components/ui/animal-selector";
+import { AnimalSelector } from "@/components/habit/AnimalSelector";
 import { Button } from "@/components/ui/button";
 import { CadenceSlider } from "@/components/ui/cadence-slider";
 import {

@@ -4,6 +4,7 @@ import React, {
   type ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -57,6 +58,12 @@ const HABITS_STORAGE_KEY = "menagerie_habits";
 export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const habitsRef = useRef<Habit[]>([]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    habitsRef.current = habits;
+  }, [habits]);
 
   // Load habits from localStorage on component mount
   useEffect(() => {
@@ -102,15 +109,17 @@ export const HabitProvider: React.FC<HabitProviderProps> = ({ children }) => {
   useEffect(() => {
     if (!isLoaded) return;
 
-    const healthCheckInterval = setInterval(() => {
-      setHabits((currentHabits) => {
-        const updatedHabits = checkAllHabitsHealth(currentHabits);
-        return updatedHabits;
-      });
-    }, 10000); // Check every 10 seconds
+    const performHealthCheck = () => {
+      const result = checkAllHabitsHealth(habitsRef.current);
+      if (result.hasAnyChanges) {
+        setHabits(result.habits);
+      }
+    };
+
+    const healthCheckInterval = setInterval(performHealthCheck, 10000); // Check every 10 seconds
 
     // Initial health check
-    setHabits((currentHabits) => checkAllHabitsHealth(currentHabits));
+    performHealthCheck();
 
     return () => clearInterval(healthCheckInterval);
   }, [isLoaded]);

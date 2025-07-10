@@ -43,9 +43,9 @@ export function AnimalSelector({ value, onValueChange }: AnimalSelectorProps) {
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-100 p-0">
+      <PopoverContent className="w-90 p-0">
         <div className="p-2">
-          <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+          <div className="grid grid-cols-3 gap-2 max-h-96 overflow-y-auto">
             {AVAILABLE_ANIMALS.map((animal) => {
               const assets = getAnimalAssets(animal);
               const displayName = getAnimalAssetDir(animal);
@@ -64,9 +64,9 @@ export function AnimalSelector({ value, onValueChange }: AnimalSelectorProps) {
                   <img
                     src={assets.pngSrc}
                     alt={displayName}
-                    className="w-10 h-10 object-contain"
+                    className="w-9 h-9 object-contain"
                   />
-                  <span className="text-xs font-medium text-center leading-tight p-0">
+                  <span className="text-xs font-medium text-center leading-tight">
                     {displayName}
                   </span>
                 </Button>

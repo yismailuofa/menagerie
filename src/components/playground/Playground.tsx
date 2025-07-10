@@ -37,21 +37,37 @@ export default function Playground() {
     const handleResize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
+        // Account for border (2px each side), padding (4*0.25rem = 1rem each side), and inner padding
+        const borderAndPadding = 4 + 32 + 32; // 2px border + 2rem padding + 2rem inner padding
         setCanvasSize({
-          width: rect.width - 60, // Account for padding
-          height: rect.height - 60,
+          width: Math.max(200, rect.width - borderAndPadding),
+          height: Math.max(200, rect.height - borderAndPadding),
         });
       }
     };
 
+    // Use ResizeObserver for better resize detection
+    const resizeObserver = new ResizeObserver(handleResize);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Initial size calculation
     handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
   }, []);
 
   // Initialize shapes when habits change - create one shape per habit entry
   useEffect(() => {
     const newShapes: AnimatedShape[] = [];
+
+    // Ensure we have valid canvas dimensions for positioning
+    const safeCanvasWidth = Math.max(200, canvasSize.width);
+    const safeCanvasHeight = Math.max(200, canvasSize.height);
 
     habits.forEach((habit) => {
       const totalEntries = habit.entries.length;
@@ -60,16 +76,21 @@ export default function Playground() {
       // 1. Create ONE consolidated shape representing all full groups of 10
       if (groupsOfTen > 0) {
         const size = BASE_SIZE * (1 + 0.1 * groupsOfTen); // 10% larger per group of ten
+        const halfSize = size / 2;
 
         const vx = (Math.random() - 0.5) * 100;
         const vy = (Math.random() - 0.5) * 100;
+
+        // Ensure initial position is within bounds
+        const maxX = Math.max(halfSize, safeCanvasWidth - halfSize);
+        const maxY = Math.max(halfSize, safeCanvasHeight - halfSize);
 
         newShapes.push({
           id: `${habit.id}-grouped-tens`,
           habitId: habit.id,
           entryId: `grouped-tens`,
-          x: Math.random() * (canvasSize.width - size) + size / 2,
-          y: Math.random() * (canvasSize.height - size) + size / 2,
+          x: Math.random() * (maxX - halfSize) + halfSize,
+          y: Math.random() * (maxY - halfSize) + halfSize,
           vx,
           vy,
           color: habit.color,
@@ -88,15 +109,20 @@ export default function Playground() {
       const remainingEntries = habit.entries.slice(groupsOfTen * 10);
       remainingEntries.forEach((entry) => {
         const size = BASE_SIZE;
+        const halfSize = size / 2;
         const vx = (Math.random() - 0.5) * 100;
         const vy = (Math.random() - 0.5) * 100;
+
+        // Ensure initial position is within bounds
+        const maxX = Math.max(halfSize, safeCanvasWidth - halfSize);
+        const maxY = Math.max(halfSize, safeCanvasHeight - halfSize);
 
         newShapes.push({
           id: `${habit.id}-${entry.id}`,
           habitId: habit.id,
           entryId: entry.id,
-          x: Math.random() * (canvasSize.width - size) + size / 2,
-          y: Math.random() * (canvasSize.height - size) + size / 2,
+          x: Math.random() * (maxX - halfSize) + halfSize,
+          y: Math.random() * (maxY - halfSize) + halfSize,
           vx,
           vy,
           color: habit.color,
@@ -171,23 +197,25 @@ export default function Playground() {
           newX = shape.x + newVx * deltaSeconds;
           newY = shape.y + newVy * deltaSeconds;
 
-          // Bounce off walls
-          if (newX <= halfSize || newX >= canvasSize.width - halfSize) {
+          // Ensure we have valid canvas dimensions
+          const maxWidth = Math.max(100, canvasSize.width);
+          const maxHeight = Math.max(100, canvasSize.height);
+
+          // Bounce off walls with proper boundary checking
+          if (newX <= halfSize || newX >= maxWidth - halfSize) {
             newVx = -newVx;
             // Update facing direction when bouncing horizontally
             newFacingLeft = newVx < 0;
-            newX = Math.max(
-              halfSize,
-              Math.min(canvasSize.width - halfSize, newX)
-            );
+            newX = Math.max(halfSize, Math.min(maxWidth - halfSize, newX));
           }
-          if (newY <= halfSize || newY >= canvasSize.height - halfSize) {
+          if (newY <= halfSize || newY >= maxHeight - halfSize) {
             newVy = -newVy;
-            newY = Math.max(
-              halfSize,
-              Math.min(canvasSize.height - halfSize, newY)
-            );
+            newY = Math.max(halfSize, Math.min(maxHeight - halfSize, newY));
           }
+
+          // Additional safety check to ensure animals never go outside bounds
+          newX = Math.max(halfSize, Math.min(maxWidth - halfSize, newX));
+          newY = Math.max(halfSize, Math.min(maxHeight - halfSize, newY));
         }
 
         return {

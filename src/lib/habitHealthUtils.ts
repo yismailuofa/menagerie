@@ -31,34 +31,33 @@ export function checkHabitHealth(habit: Habit): HealthCheckResult {
       isDead: false,
       hasChanged: false,
     };
-  }
+  } else {
+    const newHealth = Math.max(0, habit.health - 25);
+    const isDead = newHealth === 0;
 
-  // If past one cadence period but less than two, reduce to half health
-  if (timeSinceLastCompletion < cadenceMs * 2) {
-    const newHealth = Math.max(0, habit.health * 0.5);
     return {
       health: newHealth,
-      isDead: false,
+      isDead: isDead,
       hasChanged: habit.health !== newHealth,
     };
   }
+}
 
-  // If past two cadence periods, habit dies
-  return {
-    health: 0,
-    isDead: true,
-    hasChanged: !habit.isDead || habit.health !== 0,
-  };
+export interface HealthCheckAllResult {
+  habits: Habit[];
+  hasAnyChanges: boolean;
 }
 
 /**
  * Checks all habits and returns updated versions if their health changed
  */
-export function checkAllHabitsHealth(habits: Habit[]): Habit[] {
-  return habits.map((habit) => {
+export function checkAllHabitsHealth(habits: Habit[]): HealthCheckAllResult {
+  let hasAnyChanges = false;
+  const updatedHabits = habits.map((habit) => {
     const healthCheck = checkHabitHealth(habit);
 
     if (healthCheck.hasChanged) {
+      hasAnyChanges = true;
       return {
         ...habit,
         health: healthCheck.health,
@@ -68,6 +67,11 @@ export function checkAllHabitsHealth(habits: Habit[]): Habit[] {
 
     return habit;
   });
+
+  return {
+    habits: hasAnyChanges ? updatedHabits : habits,
+    hasAnyChanges,
+  };
 }
 
 /**

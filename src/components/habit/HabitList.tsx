@@ -7,6 +7,7 @@ import {
   isHabitOverdue,
 } from "@/lib/habitHealthUtils";
 import { Check, Clock, Heart, Trash2 } from "lucide-react";
+import CreateButton from "./CreateButton";
 
 export const HabitList: React.FC = () => {
   const { habits, addHabitEntry, deleteHabit } = useHabits();
@@ -37,7 +38,10 @@ export const HabitList: React.FC = () => {
 
   return (
     <div className="w-full">
-      <h3 className="text-lg font-semibold mb-4">Your Habits</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold mb-4">Your Habits</h3>
+        <CreateButton />
+      </div>
       <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {habits.length === 0 ? (
           <p>No habits yet. Create your first habit!</p>
