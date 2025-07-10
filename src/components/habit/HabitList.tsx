@@ -38,8 +38,8 @@ export const HabitList: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold mb-4">Your Habits</h3>
+      <div className="flex justify-between items-center  mb-4">
+        <h3 className="text-lg font-semibold">Your Habits</h3>
         <CreateButton />
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
