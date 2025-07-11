@@ -118,3 +118,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Sleep indicator animation */
+@keyframes sleep-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}

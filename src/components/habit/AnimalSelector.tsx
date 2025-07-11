@@ -29,6 +29,7 @@ export function AnimalSelector({ value, onValueChange }: AnimalSelectorProps) {
               src={selectedAssets.pngSrc}
               alt={selectedDisplayName}
               className="w-8 h-8 object-contain"
+              style={{ imageRendering: "pixelated" }}
             />
             <span className="text-sm font-medium">{selectedDisplayName}</span>
           </div>
@@ -46,6 +47,7 @@ export function AnimalSelector({ value, onValueChange }: AnimalSelectorProps) {
                   src={assets.pngSrc}
                   alt={displayName}
                   className="w-8 h-8 object-contain"
+                  style={{ imageRendering: "pixelated" }}
                 />
                 <span className="text-sm font-medium">{displayName}</span>
               </div>

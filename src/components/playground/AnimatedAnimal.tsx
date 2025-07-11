@@ -50,6 +50,7 @@ export default function AnimatedAnimal({
     filter: isDead ? "none" : isMoving ? "none" : "grayscale(50%)",
     objectFit: "contain",
     transform: facingLeft ? "scaleX(-1)" : "scaleX(1)",
+    imageRendering: "pixelated", // Prevent blurriness when scaling
   };
 
   const captionStyle: React.CSSProperties = {
@@ -65,18 +66,38 @@ export default function AnimatedAnimal({
     whiteSpace: "nowrap",
   };
 
+  const sleepIndicatorStyle: React.CSSProperties = {
+    position: "absolute",
+    top: "-20%",
+    right: "-10%",
+    fontSize: 16,
+    textShadow: "0 0 4px rgba(0,0,0,0.5)",
+    animation: "sleep-float 2s ease-in-out infinite",
+  };
+
   // Use rip.png for dead habits, otherwise use the animal animation
   const imageSrc = isDead ? "/rip.png" : isMoving ? gifSrc : pngSrc;
   const displayText = isDead ? `💀 ${habitName}` : habitName;
 
   return (
     <div style={containerStyle}>
-      <img
-        src={imageSrc}
-        alt={isDead ? "Dead habit" : habitName}
-        style={imgStyle}
-        draggable={false}
-      />
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <img
+          src={imageSrc}
+          alt={isDead ? "Dead habit" : habitName}
+          style={imgStyle}
+          draggable={false}
+        />
+        {/* Sleep indicator - show when not moving and not dead */}
+        {!isMoving && !isDead && <div style={sleepIndicatorStyle}>💤</div>}
+      </div>
       <span style={captionStyle}>{displayText}</span>
     </div>
   );
