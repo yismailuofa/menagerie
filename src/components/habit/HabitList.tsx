@@ -7,6 +7,7 @@ import {
   isHabitOverdue,
 } from "@/lib/habitHealthUtils";
 import { Check, Clock, Heart, Trash2 } from "lucide-react";
+import { ThemeToggle } from "../theme/ThemeToggle";
 import CreateButton from "./CreateButton";
 
 export const HabitList: React.FC = () => {
@@ -31,7 +32,7 @@ export const HabitList: React.FC = () => {
 
   const getButtonIcon = (habit: any) => {
     if (habit.isDead) {
-      return <Heart size={16} className="fill-red-600 text-transparent" />;
+      return <Heart size={16} className="fill-white" />;
     }
     return <Check size={16} />;
   };
@@ -40,7 +41,10 @@ export const HabitList: React.FC = () => {
     <div className="w-full">
       <div className="flex justify-between items-center  mb-4">
         <h3 className="text-lg font-semibold">Your Habits</h3>
-        <CreateButton />
+        <div className="flex gap-2">
+          <ThemeToggle />
+          <CreateButton />
+        </div>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {habits.length === 0 ? (
@@ -53,9 +57,7 @@ export const HabitList: React.FC = () => {
             return (
               <div
                 key={habit.id}
-                className={`flex-shrink-0 w-64 flex flex-col gap-3 p-3 border rounded-md bg-card ${
-                  habit.isDead ? "opacity-75" : ""
-                }`}
+                className={`flex-shrink-0 w-64 flex flex-col gap-3 p-3 border rounded-md bg-card`}
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -111,9 +113,9 @@ export const HabitList: React.FC = () => {
 
                 <Button
                   onClick={() => handleCompleteHabit(habit.id)}
-                  variant={habit.isDead ? "default" : "outline"}
+                  variant={habit.isDead ? "destructive" : "outline"}
                   size="sm"
-                  className="w-full mt-auto"
+                  className="group w-full mt-auto"
                 >
                   {getButtonIcon(habit)}
                   {getButtonText(habit)}

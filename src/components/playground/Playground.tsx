@@ -174,7 +174,7 @@ export default function Playground() {
           if (newMovementTimer <= 0) {
             // Switch to pause mode
             newIsMoving = false;
-            newPauseTimer = Math.random() * 2000 + 1000; // 1-3 seconds pause
+            newPauseTimer = Math.random() * 10000 + 2000; // 5-15 seconds pause
           }
         } else {
           newPauseTimer -= deltaTime;
