@@ -1,6 +1,5 @@
 import { AnimalSelector } from "@/components/habit/AnimalSelector";
 import { Button } from "@/components/ui/button";
-import { CadenceSlider } from "@/components/ui/cadence-slider";
 import {
   Dialog,
   DialogContent,
@@ -18,9 +17,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useHabits } from "@/contexts/HabitContext";
+import { useHabits, type Habit } from "@/contexts/HabitContext";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -31,35 +30,52 @@ const formSchema = z.object({
     .max(50, "Habit name must be less than 50 characters"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Please select a valid color"),
   animal: z.string().min(1, "Please select an animal"),
-  cadence: z.number().min(15, "Cadence must be at least 15 seconds"),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-interface CreateHabitModalProps {
+interface EditHabitModalProps {
   isOpen: boolean;
   onClose: () => void;
+  habit: Habit | null;
 }
 
-export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
+export const EditHabitModal: React.FC<EditHabitModalProps> = ({
   isOpen,
   onClose,
+  habit,
 }) => {
-  const { createHabit } = useHabits();
+  const { updateHabit } = useHabits();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       color: "#88aaee",
-      animal: "CluckingChicken", // Default animal
-      cadence: 86400, // Default to daily
+      animal: "CluckingChicken",
     },
   });
 
+  // Update form when habit changes
+  useEffect(() => {
+    if (habit) {
+      form.reset({
+        name: habit.name,
+        color: habit.color,
+        animal: habit.animal,
+      });
+    }
+  }, [habit, form]);
+
   const onSubmit = (data: FormData) => {
-    createHabit(data.name, data.color, data.cadence, data.animal);
-    form.reset();
+    if (!habit) return;
+
+    updateHabit(habit.id, {
+      name: data.name,
+      color: data.color,
+      animal: data.animal,
+    });
+
     onClose();
   };
 
@@ -79,7 +95,7 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New Habit</DialogTitle>
+          <DialogTitle>Edit Habit</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -152,31 +168,11 @@ export const CreateHabitModal: React.FC<CreateHabitModalProps> = ({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="cadence"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cadence</FormLabel>
-                  <FormControl>
-                    <CadenceSlider
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    How often you want to perform this habit.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button type="submit">Create Habit</Button>
+              <Button type="submit">Save Changes</Button>
             </DialogFooter>
           </form>
         </Form>

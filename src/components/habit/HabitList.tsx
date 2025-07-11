@@ -1,17 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { HealthBar } from "@/components/ui/health-bar";
+import type { Habit } from "@/contexts/HabitContext";
 import { useHabits } from "@/contexts/HabitContext";
 import {
   formatCadence,
   getNextExpectedCompletion,
   isHabitOverdue,
 } from "@/lib/habitHealthUtils";
-import { Check, Clock, Heart, Trash2 } from "lucide-react";
+import { Check, Clock, Edit, Heart, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { ThemeToggle } from "../theme/ThemeToggle";
 import CreateButton from "./CreateButton";
+import { EditHabitModal } from "./EditHabitModal";
 
 export const HabitList: React.FC = () => {
   const { habits, addHabitEntry, deleteHabit } = useHabits();
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
   const handleCompleteHabit = (habitId: string) => {
     addHabitEntry(habitId);
@@ -21,6 +25,14 @@ export const HabitList: React.FC = () => {
     if (confirm("Are you sure you want to delete this habit?")) {
       deleteHabit(habitId);
     }
+  };
+
+  const handleEditHabit = (habit: Habit) => {
+    setEditingHabit(habit);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingHabit(null);
   };
 
   const getButtonText = (habit: any) => {
@@ -73,14 +85,24 @@ export const HabitList: React.FC = () => {
                   >
                     {habit.isDead ? `💀 ${habit.name}` : habit.name}
                   </span>
-                  <Button
-                    onClick={() => handleDeleteHabit(habit.id)}
-                    variant="ghost"
-                    size="sm"
-                    className="ml-auto p-1 h-6 w-6 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 size={14} />
-                  </Button>
+                  <div className="ml-auto flex gap-1">
+                    <Button
+                      onClick={() => handleEditHabit(habit)}
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 h-6 w-6 text-muted-foreground hover:text-primary"
+                    >
+                      <Edit size={14} />
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteHabit(habit.id)}
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 h-6 w-6 text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
                 </div>
 
                 <HealthBar
@@ -125,6 +147,12 @@ export const HabitList: React.FC = () => {
           })
         )}
       </div>
+
+      <EditHabitModal
+        isOpen={!!editingHabit}
+        onClose={handleCloseEditModal}
+        habit={editingHabit}
+      />
     </div>
   );
 };
